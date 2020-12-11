@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, make_response
 from beoremotelistener import BeoremoteListener
+from threading import Timer
 import requests
 import json
+import sys
 
 device_port = "8080"
 app = Flask(__name__)
@@ -114,6 +116,14 @@ def adjust_volume_command(device, delta):
 
     return make_response(jsonify(message = "OK"), 200)
 
+def snooze(device):
+    with app.app_context():
+        command_standby(device)
+
+def allsnooze(device):
+    with app.app_context():
+        command_allstandby(device)
+
 @app.route('/')
 def home():
     return "Beowebmote is active with {:d} device(s) conneceted.".format(len(beolistener.get_devices().keys()))
@@ -154,6 +164,22 @@ def command_standby(device):
 @app.route("/<device>/allstandby")
 def command_allstandby(device):
     return put_command(device, "/BeoDevice/powerManagement/standby", "{\"standby\": {\"powerState\":\"allStandby\"}}")
+
+@app.route("/<device>/snooze/<delay_in_minutes>")
+def command_snooze(device, delay_in_minutes):
+    # duration is in seconds
+    duration = int(delay_in_minutes) * 60
+    t = Timer(duration, snooze, args=[device])
+    t.start()
+    return make_response(jsonify(message = "OK"), 200)
+
+@app.route("/<device>/allsnooze/<delay_in_minutes>")
+def command_allsnooze(device, delay_in_minutes):
+    # duration is in seconds
+    duration = int(delay_in_minutes) * 60
+    t = Timer(duration, allsnooze, args=[device])
+    t.start()
+    return make_response(jsonify(message = "OK"), 200)
 
 @app.route("/<device>/volume")
 def command_volume_get_level(device):
