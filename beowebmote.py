@@ -197,6 +197,18 @@ def command_volume_up(device):
 def command_volume_down(device):
     return adjust_volume_command(device, -1)
 
+@app.route("/<device>/volume/ismuted")
+def command_volume_ismuted(device):
+    return get_command(device, "/BeoZone/Zone/Sound/Volume/Speaker/Muted")
+
+@app.route("/<device>/volume/mute")
+def command_volume_mute(device):
+    return put_command(device, "/BeoZone/Zone/Sound/Volume/Speaker/Muted", "{\"muted\":true}")
+
+@app.route("/<device>/volume/unmute")
+def command_volume_unmute(device):
+    return put_command(device, "/BeoZone/Zone/Sound/Volume/Speaker/Muted", "{\"muted\":false}")
+
 @app.route("/<device>/sources")
 def command_get_sources(device):
     return get_command(device, "/BeoZone/Zone/Sources")
