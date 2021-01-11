@@ -1,6 +1,10 @@
 # beowebmote
 Beo web remote - web server for controlling network link attached B&amp;O devices
 
+All I really wanted was to create a magic button that could shut it all off when leaving home. Along the way and after some serious research on Internet (mainly GitHub) and reverse engineering an app (or rather some of how it communicates with the system) I managed to build the desired functionality. With the knowledge I had gathered I managed to squeeze in a couple of more features. One day I also realized that a snooze function would be useful so that I could fall asleep listening to music (or any other source in fact).
+
+It's nothing fancy really. If you want to add features please go ahead!
+
 ## Usage
 Launch the web server using the following command:
 ```
