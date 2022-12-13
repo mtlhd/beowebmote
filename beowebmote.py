@@ -124,6 +124,12 @@ def allsnooze(device):
     with app.app_context():
         command_allstandby(device)
 
+def queue_content_with_id(device, contenttype, contentid, flush):
+    behaviour = "planned"
+    if flush:
+        behaviour = "impulsive"
+    return post_command(device, "/BeoZone/Zone/PlayQueue?instantplay", "{\"playQueueItem\":{\"behaviour\":" + behaviour + ",\"" + contenttype + "\":{\"deezer\":{\"id\":"+ contentid +"},\"image\":[]}}}")
+        
 @app.route('/')
 def home():
     return "Beowebmote is active with {:d} device(s) conneceted.".format(len(beolistener.get_devices().keys()))
@@ -212,6 +218,14 @@ def command_volume_unmute(device):
 @app.route("/<device>/sources")
 def command_get_sources(device):
     return get_command(device, "/BeoZone/Zone/Sources")
+
+@app.route("/<device>/queue/<contentType>/<contentId>")
+def queue_content_with_id(device, contentType, contentId):
+    return command_queue_id(device, contentType, contentId, "planned")
+
+@app.route("/<device>/play/<contentType>/<contentId>")
+def queue_content_with_id(device, contentType, contentId):
+    return command_queue_id(device, contentType, contentId, "impulsive")
 
 if __name__ == '__main__':
     app.run()
