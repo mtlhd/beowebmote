@@ -124,12 +124,17 @@ def allsnooze(device):
     with app.app_context():
         command_allstandby(device)
 
-def queue_content_with_id(device, contenttype, contentid, flush):
-    behaviour = "planned"
+def queue_deezer_content_with_id(device, contenttype, contentid, flush):
     if flush:
-        behaviour = "impulsive"
-    return post_command(device, "/BeoZone/Zone/PlayQueue?instantplay", "{\"playQueueItem\":{\"behaviour\":" + behaviour + ",\"" + contenttype + "\":{\"deezer\":{\"id\":"+ contentid +"},\"image\":[]}}}")
-        
+        return post_command(device, "/BeoZone/Zone/PlayQueue?instantplay", "{\"playQueueItem\":{\"behaviour\":\"planned\",\"" + contenttype + "\":{\"deezer\":{\"id\":"+ contentid +"},\"image\":[]}}}")
+    return post_command(device, "/BeoZone/Zone/PlayQueue", "{\"playQueueItem\":{\"behaviour\":\"planned\",\"" + contenttype + "\":{\"deezer\":{\"id\":"+ contentid +"},\"image\":[]}}}")
+    
+def queue_dlna_content_with_id(device, contenttype, contentUrl, flush):
+    if flush:
+        return post_command(device, "/BeoZone/Zone/PlayQueue?instantplay", "{\"playQueueItem\":{\"behaviour\":\"planned\",\"" + contenttype + "\":{\"dlna\":{\"url\":\""+ contentUrl +"\"}}}}")
+    return post_command(device, "/BeoZone/Zone/PlayQueue", "{\"playQueueItem\":{\"behaviour\":\"planned\",\"" + contenttype + "\":{\"dlna\":{\"url\":\""+ contentUrl +"\"}}}}")
+    
+    
 @app.route('/')
 def home():
     return "Beowebmote is active with {:d} device(s) conneceted.".format(len(beolistener.get_devices().keys()))
@@ -219,13 +224,25 @@ def command_volume_unmute(device):
 def command_get_sources(device):
     return get_command(device, "/BeoZone/Zone/Sources")
 
-@app.route("/<device>/queue/<contentType>/<contentId>")
-def queue_content_with_id(device, contentType, contentId):
-    return command_queue_id(device, contentType, contentId, "planned")
+@app.route("/<device>/queue/tunein/<stationId>")
+def queue_content_with_id(device, contentType, stationId):
+    return post_command(device, "/BeoZone/Zone/PlayQueue?instantplay", "{\"playQueueItem\":{\"behaviour\":\"planed\",\"station\":{\"tuneIn\":{\"stationId\":\""+ stationId +"\"},\"image\":[]}}}")
 
-@app.route("/<device>/play/<contentType>/<contentId>")
-def queue_content_with_id(device, contentType, contentId):
-    return command_queue_id(device, contentType, contentId, "impulsive")
+@app.route("/<device>/queue/deezer/<contentType>/<contentId>")
+def queue_deezer_with_id(device, contentType, contentId):
+    return queue_deezer_content_with_id(device, contentType, contentId, true)
+
+@app.route("/<device>/play/deezer/<contentType>/<contentId>")
+def play_deezer_with_id(device, contentType, contentId):
+    return def queue_deezer_content_with_id(device, contentType, contentId, false)
+
+@app.route("/<device>/queue/dlna/<contentType>/<contentUrl>")
+def queue_dlna_with_id(device, contentType, contentUrl):
+    return queue_dlna_content_with_id(device, contentType, contentUrl, true)
+
+@app.route("/<device>/play/dlna/<contentType>/<contentUrl>")
+def play_dlna_with_id(device, contentType, contentUrl):
+    return def queue_dlna_content_with_id(device, contentType, contentUrl, false)
 
 if __name__ == '__main__':
     app.run()
